@@ -16,3 +16,6 @@ geo_conf <- geojson_sf(url)
 lhin <- st_read("C:/STC_Data/LHIN/LHIN_Sub_Regions_Cartographic_AUGUST_2017.gdb")
 
 plot(lhin$Shape)
+
+# library(coronavirus)
+# data(coronavirus)
