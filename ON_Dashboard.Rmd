@@ -214,12 +214,24 @@ Column {data-width=400}
 ```{r}
 daily_confirmed <- coronavirus %>%
   dplyr::filter(type == "confirmed") %>%
-  dplyr::filter(date >= "2020-02-29") %>%
+  dplyr::filter(Country.Region != "Canada" | Country.Region == "Canada" & Province.State == "Ontario") %>%
+  #dplyr::filter(date >= "2020-02-29") %>%
   dplyr::mutate(country = Country.Region) %>%
   dplyr::group_by(date, country) %>%
   dplyr::summarise(total = sum(cases)) %>%
   dplyr::ungroup() %>%
   tidyr::pivot_wider(names_from = country, values_from = total)
+
+for(i in 2:length(daily_confirmed)) {
+  tmp <- cumsum(daily_confirmed[,i])
+  tmp <- tmp[tmp > 0]
+  if (length(tmp) < nrow(daily_confirmed)) {
+    daily_confirmed[,i] <- c(tmp, rep(NA, nrow(daily_confirmed) - length(tmp)))
+  } else {
+    daily_confirmed[,i] <- tmp[1:nrow(daily_confirmed)]
+  }
+}
+daily_confirmed$date <- 1:nrow(daily_confirmed)
 
 #----------------------------------------
 # Plotting the data
@@ -231,14 +243,14 @@ daily_confirmed %>%
     y = ~Canada,
     type = "scatter",
     mode = "lines+markers",
-    name = "Canada"
+    name = "Ontario"
   ) %>%
   plotly::add_trace(
     x = ~date,
-    y = ~France,
+    y = ~US,
     type = "scatter",
     mode = "lines+markers",
-    name = "France"
+    name = "United States"
   ) %>%
   plotly::add_trace(
     x = ~date,
@@ -257,8 +269,8 @@ daily_confirmed %>%
   plotly::layout(
     title = "",
     legend = list(x = 0.1, y = 0.9),
-    yaxis = list(title = "Number of new confirmed cases"),
-    xaxis = list(title = "Date"),
+    yaxis = list(title = "Number of new confirmed cases", type = "log"),
+    xaxis = list(title = "Days since First Case"),
     # paper_bgcolor = "black",
     # plot_bgcolor = "black",
     # font = list(color = 'white'),
@@ -278,8 +290,8 @@ daily_confirmed %>%
 ```{r daily_summary}
 df_EU <- coronavirus %>%
   # dplyr::filter(date == max(date)) %>%
-  dplyr::filter(Country.Region == "Canada" |
-    Country.Region == "France" |
+  dplyr::filter(Country.Region == "Canada" & Province.State == "Ontario" |
+    Country.Region == "US" |
     Country.Region == "Italy" |
     Country.Region == "Spain") %>%
   dplyr::group_by(Country.Region, type) %>%
@@ -295,7 +307,7 @@ df_EU <- coronavirus %>%
   dplyr::mutate(country = dplyr::if_else(Country.Region == "United Arab Emirates", "UAE", Country.Region)) %>%
   dplyr::mutate(country = dplyr::if_else(country == "Mainland China", "China", country)) %>%
   dplyr::mutate(country = dplyr::if_else(country == "North Macedonia", "N.Macedonia", country)) %>%
-  dplyr::mutate(country = trimws(country)) %>%
+  dplyr::mutate(country = dplyr::if_else(country == "Canada", "Ontario", country)) %>%  dplyr::mutate(country = trimws(country)) %>%
   dplyr::mutate(country = factor(country, levels = country))
 
 plotly::plot_ly(
@@ -318,7 +330,7 @@ plotly::plot_ly(
   ) %>%
   plotly::layout(
     barmode = "stack",
-    yaxis = list(title = "Total cases"),
+    yaxis = list(title = "Total cases", type="log"),
     xaxis = list(title = ""),
     hovermode = "compare",
     margin = list(
