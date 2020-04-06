@@ -49,6 +49,10 @@ df <- coronavirus %>%
   dplyr::mutate(country = trimws(country)) %>%
   dplyr::mutate(country = factor(country, levels = country))
 
+# TODO need to integrate ontario data in here
+df$confirmed <- 4038L 
+df$death <- 119L
+
 df_daily <- coronavirus %>%
   dplyr::filter(Country.Region == "Canada" & Province.State == "Ontario") %>%
   dplyr::group_by(date, type) %>%
@@ -69,7 +73,22 @@ df_daily <- coronavirus %>%
   )
 
 
+# TODO integrate ontario data here
+df_daily <- rbind(df_daily,
+                  list(date = as.Date("2020-04-05"), 
+                       confirmed = 408L,
+                       death = 25L,
+                       active = 383L,
+                       confirmed_cum = 4038L,
+                       death_cum = 119L,
+                       active_cum = 3919L))
+
 df1 <- coronavirus %>% dplyr::filter(date == max(date))
+
+# TODO need to integrate ontario data
+df1$cases[df1$Province.State == "Ontario" & df1$type == "confirmed"] <- 408L
+df1$cases[df1$Province.State == "Ontario" & df1$type == "death"] <- 25L
+
 ```
 
 Summary
@@ -233,6 +252,10 @@ for(i in 2:length(daily_confirmed)) {
 }
 daily_confirmed$date <- 1:nrow(daily_confirmed)
 
+# TODO need to integrate Ontario data here
+daily_confirmed$Canada[min(which(is.na(daily_confirmed$Canada)))] <- 4038L
+
+
 #----------------------------------------
 # Plotting the data
 
@@ -310,6 +333,12 @@ df_EU <- coronavirus %>%
   dplyr::mutate(country = dplyr::if_else(country == "Canada", "Ontario", country)) %>%  dplyr::mutate(country = trimws(country)) %>%
   dplyr::mutate(country = factor(country, levels = country))
 
+# TODO integrate ontario data here
+df_EU$confirmed[df_EU$Country.Region == "Canada"] <- 4038L
+df_EU$death[df_EU$Country.Region == "Canada"] <- 119L
+df_EU$unrecovered[df_EU$Country.Region == "Canada"] <- 3919L
+
+
 plotly::plot_ly(
   data = df_EU,
   x = ~country,
@@ -361,6 +390,12 @@ cv_data_for_plot <- coronavirus %>%
   dplyr::summarise(cases = sum(cases)) %>%
   dplyr::mutate(log_cases = 2 * log(cases)) %>%
   dplyr::ungroup()
+
+# TODO integrate ontario data
+cv_data_for_plot$cases[cv_data_for_plot$Province.State == "Ontario" & cv_data_for_plot$type == "confirmed"] <- 4038L
+
+cv_data_for_plot$cases[cv_data_for_plot$Province.State == "Ontario" & cv_data_for_plot$type == "death"] <- 119L
+
 cv_data_for_plot.split <- cv_data_for_plot %>% split(cv_data_for_plot$type)
 pal <- colorFactor(c("orange", "red", "green"), domain = c("confirmed", "death", "recovered"))
 map_object <- leaflet() %>% addProviderTiles(providers$Stamen.Toner)
