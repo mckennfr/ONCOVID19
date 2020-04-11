@@ -8,11 +8,25 @@ options(stringsAsFactors = FALSE)
 
 # url <- "https://data.ontario.ca/dataset/f4112442-bdc8-45d2-be3c-12efae72fb27/resource/455fd63b-603d-4608-8216-7d8647f43350/download/conposcovidloc.csv"
 url <- "https://data.ontario.ca/dataset/f4f86e54-872d-43f8-8a86-3892fd3cb5e6/resource/ed270bb8-340b-41f9-a7c6-e8ef587e6d11/download/covidtesting.csv"
-dat_conf <- read.csv(url)
+ont_data <- read.csv(url)
+
+ont_cor <- ont_data[,c("Reported.Date", "Total.Cases", "Deaths")]
+names(ont_cor) <- c("date", "confirmed_cum", "death_cum")
+ont_cor[is.na(ont_cor)] <- 0
+
+ont_cor$active_cum <- ont_cor$confirmed_cum - ont_cor$death_cum
+
+ont_cor$confirmed <- ont_cor$confirmed_cum - c(0, ont_cor$confirmed_cum[-nrow(ont_cor)])
+ont_cor$death <- ont_cor$death_cum - c(0, ont_cor$death_cum[-nrow(ont_cor)])
+ont_cor$active <- ont_cor$active_cum - c(0, ont_cor$active_cum[-nrow(ont_cor)])
+
+
+dat_conf <- ont_data
 
 df <- data.frame(Row.Id = 1:nrow(dat_conf),
                  X = dat_conf$Reported.Date,
-                 Y = dat_conf$Total.Cases)
+                 Y = dat_conf$Total.Cases,
+                 Y2 = dat_conf$Deaths)
 
 cond <- is.na(df$Y) | duplicated(df$Y)
 df1 <- df[!cond,]
@@ -64,9 +78,18 @@ yc1 <- exp(mod2$coefficients[1]) * exp(mod2$coefficients[2] * xc)
 #   yc[i] <- c1 * yc[i - 1] + c2 * yc[i - 1] * yc[i - 1]
 # }
 
-plot(df2$X, df2$Y, type = "b", lwd=3, ylim = c(0,0.8*pars['K']), xlim = c(30, 70))
+plot(df2$X, df2$Y, type = "b", lwd=3, 
+     ylim = c(0,0.95*pars['K']), xlim = c(0, 90),
+     ylab = "Number of Cases",
+     xlab = "Days since beginnning of outbreak",
+     main = "COVID-19 Cases in Ontario")
 lines(xc, yc1, lwd=2, col="red")
 lines(xc, yc, lwd = 2, col= "red", lty=3)
+
+
+
+
+
 
 if (is.null(dat_conf$ROW_ID)) dat_conf$ROW_ID <- 1:nrow(dat_conf)
     
@@ -88,6 +111,7 @@ lhin <- st_read("C:/STC_Data/LHIN/LHIN_Sub_Regions_Cartographic_AUGUST_2017.gdb"
 
 plot(lhin$Shape)
 
-# library(coronavirus)
-# data(coronavirus)
-# update_datasets()
+library(coronavirus)
+data(coronavirus)
+update_datasets()
+corona2 <- coronavirus[coronavirus$Province.State == "Ontario",]
