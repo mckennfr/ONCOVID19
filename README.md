@@ -15,7 +15,7 @@ a markdown file (.md) suitable for publishing to GitHub is generated.
 
 Ontario is now providing a more detailed daily epidemiologic summary of
 COVID-19 cases in the province ([January 15 -
-April 1, 2020](https://files.ontario.ca/moh-covid-19-report-en-2020-04-01.pdf))
+April 12, 2020](https://files.ontario.ca/moh-covid-19-report-en-2020-04-12.pdf))
 that will be updated each day at 10:30 a.m. The new summary provides
 more provincial and regional data on confirmed cases, demographics and
 trends of cases since the outbreak began including geography, exposure
@@ -35,37 +35,37 @@ head(dat_conf)
 ```
 
     ##   ROW_ID ACCURATE_EPISODE_DATE Age_Group CLIENT_GENDER CASE_ACQUISITIONINFO
-    ## 1      1            2020-03-07       40s          MALE              Neither
-    ## 2      2            2020-03-08       20s          MALE              Neither
-    ## 3      3            2020-03-10       40s        FEMALE              Neither
-    ## 4      4            2020-03-11       50s        FEMALE              Neither
-    ## 5      5            2020-03-15       50s          MALE              Neither
-    ## 6      6            2020-03-16       20s        FEMALE              Neither
-    ##   RESOLVED                     Reporting_PHU          Reporting_PHU_Address
-    ## 1      Yes             Toronto Public Health 277 Victoria Street, 5th Floor
-    ## 2      Yes             Toronto Public Health 277 Victoria Street, 5th Floor
-    ## 3      Yes             Toronto Public Health 277 Victoria Street, 5th Floor
-    ## 4      Yes      Middlesex-London Health Unit                 50 King Street
-    ## 5      Yes Region of Waterloo, Public Health         99 Regina Street South
-    ## 6      Yes          Brant County Health Unit        194 Terrace Hill Street
+    ## 1      1            2020-03-21       60s          MALE       Travel-Related
+    ## 2      2            2020-03-30       20s        FEMALE  Information pending
+    ## 3      3            2020-03-30       60s          MALE  Information pending
+    ## 4      4            2020-03-28       40s        FEMALE  Information pending
+    ## 5      5            2020-03-27       40s        FEMALE              Neither
+    ## 6      6            2020-03-28       50s          MALE  Information pending
+    ##       OUTCOME1                Reporting_PHU          Reporting_PHU_Address
+    ## 1     Resolved        Toronto Public Health 277 Victoria Street, 5th Floor
+    ## 2 Not Resolved        Toronto Public Health 277 Victoria Street, 5th Floor
+    ## 3 Not Resolved           Peel Public Health         7120 Hurontario Street
+    ## 4     Resolved Middlesex-London Health Unit                 50 King Street
+    ## 5     Resolved         Ottawa Public Health        100 Constellation Drive
+    ## 6 Not Resolved        Toronto Public Health 277 Victoria Street, 5th Floor
     ##   Reporting_PHU_City Reporting_PHU_Postal_Code
     ## 1            Toronto                   M5B 1W2
     ## 2            Toronto                   M5B 1W2
-    ## 3            Toronto                   M5B 1W2
+    ## 3        Mississauga                   L5W 1N4
     ## 4             London                   N6A 5L7
-    ## 5           Waterloo                   N2J 4V3
-    ## 6          Brantford                   N3R 1G7
+    ## 5             Ottawa                   K2G 6J8
+    ## 6            Toronto                   M5B 1W2
     ##                                   Reporting_PHU_Website Reporting_PHU_Latitude
     ## 1 www.toronto.ca/community-people/health-wellness-care/               43.65659
     ## 2 www.toronto.ca/community-people/health-wellness-care/               43.65659
-    ## 3 www.toronto.ca/community-people/health-wellness-care/               43.65659
+    ## 3                             www.peelregion.ca/health/               43.64747
     ## 4                                    www.healthunit.com               42.98147
-    ## 5                         www.chd.region.waterloo.on.ca               43.46288
-    ## 6                                         www.bchu.org/               43.15181
+    ## 5                             www.ottawapublichealth.ca               45.34567
+    ## 6 www.toronto.ca/community-people/health-wellness-care/               43.65659
     ##   Reporting_PHU_Longitude
     ## 1               -79.37936
     ## 2               -79.37936
-    ## 3               -79.37936
+    ## 3               -79.70889
     ## 4               -81.25402
-    ## 5               -80.52091
-    ## 6               -80.27437
+    ## 5               -75.76391
+    ## 6               -79.37936

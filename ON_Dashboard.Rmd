@@ -339,6 +339,11 @@ daily_confirmed %>%
     )
   )
 ```
+
+
+Column {data-width=400}
+-------------------------------------
+
  
 ### **Cases distribution by type**
 
@@ -398,11 +403,10 @@ plotly::plot_ly(
   )
 ```
 
+### **Logistic curve**
 
-Row
------------------------------------------------------------------------
 
-```{r regression}
+```{r logistic}
 cond <- corona2$Province.State == "Ontario" & corona2$type == "confirmed"
 df3 <- corona2[cond, c("date", "cases")]
 df3$cuml <- cumsum(df3$cases)
@@ -414,7 +418,6 @@ df3$Y <- as.numeric(df3$cuml)
 mod1 <- nls(log(Y) ~ Const + r * X + I(log(K - Y)), 
             data = df3[-(1:8),], 
             start = c(Const = 1, r = 0.25, K = 10000))
-print(summary(mod1))
 
 pars <- mod1$m$getAllPars()
 
@@ -533,6 +536,16 @@ About
 =======================================================================
 
 **Modified for Ontario**
+
+Added official Ontario results from the latest [public data on COVID-19 cases in Ontario](https://www.ontario.ca/page/2019-novel-coronavirus#section-0) and the [status dataset](https://data.ontario.ca/dataset/status-of-covid-19-cases-in-ontario).
+
+Added logistic curve for Ontario.
+
+```{r regression}
+print(summary(mod1))
+
+```
+
 
 **The Coronavirus Dashboard: the case of Belgium**
 
