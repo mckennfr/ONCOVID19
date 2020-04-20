@@ -417,7 +417,7 @@ df3$Y <- as.numeric(df3$cuml)
 
 mod1 <- nls(log(Y) ~ Const + r * X + I(log(K - Y)), 
             data = df3[-(1:8),], 
-            start = c(Const = 1, r = 0.25, K = max(df3$Y)+0.1))
+            start = c(Const = 1, r = 0.25, K = 1.2*max(df3$Y)+0.1))
 
 pars <- mod1$m$getAllPars()
 

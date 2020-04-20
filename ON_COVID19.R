@@ -55,7 +55,7 @@ print(summary(mod2))
 
 mod3 <- nls(log(Y) ~ Const + r * X + I(log(K - Y)), 
             data = df2[-(1:8),], 
-            start = c(Const = 1, r = 0.25, K = max(df2$Y)+0.1))
+            start = c(Const = 1, r = 0.25, K = 1.2*max(df2$Y)+0.1))
 print(summary(mod3))
 
 pars <- mod3$m$getAllPars()
