@@ -278,7 +278,7 @@ daily_confirmed <- corona2 %>%
 
 for(i in 2:length(daily_confirmed)) {
   tmp <- cumsum(daily_confirmed[,i])
-  tmp <- tmp[tmp > 0]
+  tmp <- tmp[tmp >= 100]
   if (length(tmp) < nrow(daily_confirmed)) {
     daily_confirmed[,i] <- c(tmp, rep(NA, nrow(daily_confirmed) - length(tmp)))
   } else {
@@ -286,13 +286,47 @@ for(i in 2:length(daily_confirmed)) {
   }
 }
 daily_confirmed$date <- 1:nrow(daily_confirmed)
+cond <- apply(daily_confirmed[,names(daily_confirmed) %in% c("Canada", "US","Spain","Italy")], 1, function(x) any(!is.na(x)))
+daily_confirmed <- daily_confirmed[cond,]
 
+daily_confirmed$p30 <- 100*exp(.3*daily_confirmed$date)
+daily_confirmed$p20 <- 100*exp(.2*daily_confirmed$date)
+daily_confirmed$p10 <- 100*exp(.1*daily_confirmed$date)
+
+daily_confirmed[daily_confirmed > 2000000] <- NA
 
 #----------------------------------------
 # Plotting the data
 
 daily_confirmed %>%
   plotly::plot_ly() %>%
+  plotly::add_trace(
+    x = ~date,
+    y = ~p30,
+    type = "scatter",
+    mode = "lines",
+    line = list(color = 'rgb(80,80,80)', width = 2, dash = 'dot'),
+    hoverinfo = FALSE,
+    name = "30%"
+  ) %>%
+  plotly::add_trace(
+    x = ~date,
+    y = ~p20,
+    type = "scatter",
+    mode = "lines",
+    line = list(color = 'rgb(80,80,80)', width = 2, dash = 'dot'),
+    hoverinfo = FALSE,
+    name = "20%"
+  ) %>%
+  plotly::add_trace(
+    x = ~date,
+    y = ~p10,
+    type = "scatter",
+    mode = "lines",
+    line = list(color = 'rgb(80,80,80)', width = 2, dash = 'dot'),
+    hoverinfo = FALSE,
+    name = "10%"
+  ) %>%
   plotly::add_trace(
     x = ~date,
     y = ~Canada,
@@ -324,8 +358,8 @@ daily_confirmed %>%
   plotly::layout(
     title = "",
     legend = list(x = 0.1, y = 0.9),
-    yaxis = list(title = "Number of new confirmed cases", type = "log"),
-    xaxis = list(title = "Days since first Case"),
+    yaxis = list(title = "Number of confirmed cases", type = "log"),
+    xaxis = list(title = "Days since 100 Cases or more"),
     # paper_bgcolor = "black",
     # plot_bgcolor = "black",
     # font = list(color = 'white'),
