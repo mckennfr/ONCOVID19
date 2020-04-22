@@ -1,0 +1,55 @@
+"","","Simple multiplier 4",
+"","","Ontario",
+"","","Gross domestic product (GDP)  at market prices","Jobs 5"
+"Geographical coverage","Industry","2016","2016"
+"",,"Per dollar of output","Per million dollars of output"
+"Within province","Total industries","0.745","7.156"
+,"Crop and animal production  [BS11A]","0.723","8.309"
+,"Forestry and logging  [BS113]","0.680","6.685"
+,"Fishing, hunting and trapping  [BS114]","0.818","16.477"
+,"Support activities for agriculture and forestry  [BS115]","0.840","13.213"
+,"Mining, quarrying, and oil and gas extraction  [BS210]","0.800","4.289"
+,"Utilities  [BS220]","0.867","3.754"
+,"Residential building construction  [BS23A]","0.714","7.233"
+,"Non-residential building construction  [BS23B]","0.757","7.896"
+,"Engineering construction  [BS23C]","0.687","6.410"
+,"Repair construction  [BS23D]","0.858","11.439"
+,"Other activities of the construction industry  [BS23E]","0.867","5.826"
+,"Manufacturing  [BS3A0]","0.462","3.609"
+,"Wholesale trade  [BS410]","0.835","6.934"
+,"Retail trade  [BS4A0]","0.874","15.442"
+,"Transportation and warehousing  [BS4B0]","0.722","7.858"
+,"Information and cultural industries  [BS510]","0.770","5.099"
+,"Finance, insurance, real estate, rental and leasing and holding companies  [BS5B0]","0.861","6.154"
+,"Owner occupied dwellings  [BS53C]","0.981","1.061"
+,"Professional, scientific and technical services  [BS540]","0.848","8.284"
+,"Administrative and support, waste management and remediation services  [BS560]","0.852","11.465"
+,"Educational services  [BS610]","0.812","20.687"
+,"Health care and social assistance  [BS620]","0.880","13.714"
+,"Arts, entertainment and recreation  [BS710]","0.799","14.400"
+,"Accommodation and food services  [BS720]","0.697","16.018"
+,"Other services (except public administration)  [BS810]","0.824","18.681"
+,"Repair, maintenance and operating and office supplies  [FC100]","..",".."
+,"Advertising, promotion, meals, entertainment, and travel  [FC200]","..",".."
+,"Transportation margins  [FC300]","..",".."
+,"Non-profit institutions serving households  [NP000]","0.839","14.338"
+,"Government education services  [GS610]","0.936","10.696"
+,"Government health services  [GS620]","0.856","11.120"
+,"Other federal government services  [GS911]","0.872","6.701"
+,"Other provincial and territorial government services  [GS912]","0.802","6.191"
+,"Other municipal government services  [GS913]","0.887","8.411"
+,"Other aboriginal government services  [GS914]","0.775","13.459"
+
+Symbol legend:
+..,  not available for a specific reference period,
+
+Footnotes:
+1,"Input-output multipliers provide estimates of economic impact per dollar of output delivered to final demand (final consumption expenditures, capital formation, or exports). The output is defined by industry according to the Input-Output Industry Classification. The economic impact is estimated for output, Gross Domestic Product (GDP) and its components, jobs and imports. The output and GDP by industry used in the calculation of multipliers differ slightly from those published in Supply and Use Tables. To avoid negative inter-industry transactions, negative secondary outputs of wholesaling margins are re-allocated to the wholesaling industry and equivalently offset through an adjustment to the value of “gross operating surplus”."
+2,National and provincial multipliers at the link-1997 and link-1961 levels are available in CSV files on request.
+3,The estimates for 2014 to 2016 are based on the 2019 comprehensive revision of the Canadian System of Macroeconomic Accounts which incorporated revisions to both international travel expenditures and cannabis-related activities. More information about the 2019 comprehensive revision is available in: A preview of the 2019 revision of the Canadian System of Macroeconomic Accounts.
+4,The <i>simple multiplier</i> measures the total value of production required from all industries across all stages of production to produce one unit of output for final use.
+5,The data source for the number of jobs used in the multipliers is table 36-10-0480-01 – “Labour productivity and related measures by business sector industry and by non-commercial activity consistent with the industry accounts”.
+6,
+"How to cite: Statistics Canada. Table 36-10-0113-01 Input-output multipliers, provincial and territorial, summary level"
+https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3610011301
+DOI: https://doi.org/10.25318/3610011301-eng

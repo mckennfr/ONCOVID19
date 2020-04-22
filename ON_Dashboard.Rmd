@@ -289,44 +289,45 @@ daily_confirmed$date <- 1:nrow(daily_confirmed)
 cond <- apply(daily_confirmed[,names(daily_confirmed) %in% c("Canada", "US","Spain","Italy")], 1, function(x) any(!is.na(x)))
 daily_confirmed <- daily_confirmed[cond,]
 
-daily_confirmed$p30 <- 100*exp(.3*daily_confirmed$date)
-daily_confirmed$p20 <- 100*exp(.2*daily_confirmed$date)
-daily_confirmed$p10 <- 100*exp(.1*daily_confirmed$date)
+mx_x <- 1.2 * nrow(daily_confirmed)
+mx_y <- 1000000
 
-daily_confirmed[daily_confirmed > 2000000] <- NA
+shapes <- list()
+annot <- list()
+for(i in 1:10) {
+  #lbl <- paste0("p",r)
+  r <- 0.05 * i
+  x0 <- 0
+  y0 <- 100
+  x1 <- mx_x
+  y1 <- 100 * exp(r * mx_x)
+  if (y1 > mx_y) {
+    x1 <- log(mx_y / 100) / r
+    y1 <- mx_y
+  }
+  shapes[[i]] <- list(
+    type = "line", layer = "below",
+    xref = "x", yref = "y",
+    #xsizemode = "scaled", ysizemode = "scaled",
+    x0 = x0, x1 = x1, y0 = y0, y1 = y1,
+    line = list(color = "grey", width = 2, dash = "dot")
+  )
+  annot[[i]] <- list(
+    text = paste0("<b>",round(100 * r, 1),"%</b>"),
+    xref = "x", yref= "y",
+    x = x1, 
+    y = log(y1, 10), 
+    showarrow = FALSE,
+    font = list(family = "Arial", size = 14, color = "grey")
+  )
+}
+
 
 #----------------------------------------
 # Plotting the data
 
 daily_confirmed %>%
   plotly::plot_ly() %>%
-  plotly::add_trace(
-    x = ~date,
-    y = ~p30,
-    type = "scatter",
-    mode = "lines",
-    line = list(color = 'rgb(80,80,80)', width = 2, dash = 'dot'),
-    hoverinfo = FALSE,
-    name = "30%"
-  ) %>%
-  plotly::add_trace(
-    x = ~date,
-    y = ~p20,
-    type = "scatter",
-    mode = "lines",
-    line = list(color = 'rgb(80,80,80)', width = 2, dash = 'dot'),
-    hoverinfo = FALSE,
-    name = "20%"
-  ) %>%
-  plotly::add_trace(
-    x = ~date,
-    y = ~p10,
-    type = "scatter",
-    mode = "lines",
-    line = list(color = 'rgb(80,80,80)', width = 2, dash = 'dot'),
-    hoverinfo = FALSE,
-    name = "10%"
-  ) %>%
   plotly::add_trace(
     x = ~date,
     y = ~Canada,
@@ -358,11 +359,10 @@ daily_confirmed %>%
   plotly::layout(
     title = "",
     legend = list(x = 0.1, y = 0.9),
-    yaxis = list(title = "Number of confirmed cases", type = "log"),
-    xaxis = list(title = "Days since 100 Cases or more"),
-    # paper_bgcolor = "black",
-    # plot_bgcolor = "black",
-    # font = list(color = 'white'),
+    yaxis = list(title = "Number of confirmed cases", 
+                 type = "log", c(0, mx_y)),
+    xaxis = list(title = "Days since 100 Cases or more", 
+                 range = c(0, mx_x)),
     hovermode = "compare",
     margin = list(
       # l = 60,
@@ -370,7 +370,9 @@ daily_confirmed %>%
       b = 10,
       t = 10,
       pad = 2
-    )
+    ),
+    shapes = shapes,
+    annotations = annot
   )
 ```
 
