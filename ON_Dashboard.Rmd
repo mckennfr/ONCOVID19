@@ -264,7 +264,7 @@ Column {data-width=400}
 -------------------------------------
 
 
-### **Daily new confirmed cases**
+### **Comparison daily cumulative confirmed cases**
     
 ```{r}
 daily_confirmed <- corona2 %>%
