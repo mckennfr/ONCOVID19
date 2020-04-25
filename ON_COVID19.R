@@ -53,6 +53,23 @@ mod2 <- lm(I(log(Y)) ~ X, data=df2[-(1:8),])
 
 print(summary(mod2))
 
+
+df99 <- df2[,1:2]
+df99$Yp1 <- c(df99$Y[-1], NA)
+df99$Y2 <- df99$Y * df99$Y
+
+mod99 <- lm(Yp1 ~ Y + Y2 + 0, data = df99)
+print(summary(mod99))
+r <- coefficients(mod99)[1]-1
+K <- -r / coefficients(mod99)[2]
+df99$Yhat <- c(NA, mod99$fitted.values)
+
+plot(df99$X, df99$Y, pch=19)
+lines(df99$X, df99$Yhat)
+
+
+
+
 mod3 <- nls(log(Y) ~ Const + r * X + I(log(K - Y)), 
             data = df2[-(1:8),], 
             start = c(Const = 1, r = 0.25, K = 1.2*max(df2$Y)+0.1))

@@ -450,28 +450,61 @@ df3 <- df3[df3$cuml > 0,c("date","cuml")]
 df3 <- df3[!duplicated(df3$cuml),]
 df3$X <- as.numeric(df3$date - min(df3$date))
 df3$Y <- as.numeric(df3$cuml)
+df3$X1 <- df3$X - 46
 
-mod1 <- nls(log(Y) ~ Const + r * X + I(log(K - Y)), 
-            data = df3[-(1:8),], 
-            start = c(Const = 1, r = 0.25, K = 1.2*max(df3$Y)+0.1))
+mod <- nls(Y ~ K * Y0 / (Y0 + (K - Y0)*exp(-r * X1)), data = df3[-(1:8),],
+           start = c(K = 20000, r = 0.2, Y0 = 46))
 
-pars <- mod1$m$getAllPars()
-
-a <- pars['K'] * exp(pars['Const'])
+pars <- mod$m$getAllPars()
+K <- pars['K']
 r <- pars['r']
-b <- exp(pars['Const'])
+Y0 <- pars['Y0']
 
-df3$Y2 <- a * exp(r * df3$X) / (1 + b * exp(r * df3$X))
+df3$Ye <- K * Y0 / (Y0 + (K - Y0) * exp(-r * df3$X1))
+
+
+# 
+# 
+# mod1 <- nls(I(log(Y)) ~ Const + r * X + I(log(K - Y + 0.1)),
+#             data = df3[-(1:8),],
+#             start = c(Const = 1, r = 0.18, K = 50000))
+# 
+# pars <- mod1$m$getAllPars()
+# 
+# a <- pars['K'] * exp(pars['Const'])
+# r <- pars['r']
+# b <- exp(pars['Const'])
+# 
+# df3$Ye <- a * exp(r * df3$X) / (1 + b * exp(r * df3$X))
+
+# df3$Yp1 <- c(df3$Y[-1], NA)
+# df3$Y2  <- df3$Y * df3$Y
+# 
+# mod2 <- lm(Yp1 ~ Y + Y2 + 0, data = df3)
+# 
+# r <- mod2$coefficients[1] - 1
+# K <- -r / mod2$coefficients[2]
+# 
+# indx <- nrow(df3) %/% 2L
+# X0 <- df3$X[indx]
+# Y0 <- df3$Y[indx] #df3$Y[indx]
+# 
+# df3$X1 <- df3$X - X0 #- df3$X[indx]
+# 
+# df3$Ye <- K * Y0 / (Y0 + (K - Y0)*exp(-r*df3$X1))
+
 
 addnl <- 1:30
 tmp <- data.frame(date = as.Date(max(df3$date)) + addnl,
                   cuml = NA_integer_,
                   X = max(df3$X) + addnl,
-                  Y = NA_real_)
-tmp$Y2 <- a * exp(r * tmp$X) / (1 + b * exp(r * tmp$X))
+                  Y = NA_real_,
+                  X1 = max(df3$X1) + addnl)
+# tmp$Ye <- a * exp(r * tmp$X) / (1 + b * exp(r * tmp$X))
+tmp$Ye <-  K * Y0 / (Y0 + (K - Y0) * exp(-r * tmp$X1))
 
 df3 <- rbind(df3, tmp)
-names(df3) <- c("date", "cuml", "X", "actual", "predicted")
+names(df3) <- c("date", "cuml", "X", "actual", "X1", "predicted")
 
 df3 %>%
   plotly::plot_ly() %>%
@@ -578,7 +611,7 @@ Added official Ontario results from the latest [public data on COVID-19 cases in
 Added logistic curve for Ontario.
 
 ```{r regression}
-print(summary(mod1))
+print(summary(mod))
 
 ```
 
