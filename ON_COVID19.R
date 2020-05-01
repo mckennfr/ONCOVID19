@@ -130,5 +130,5 @@ plot(lhin$Shape)
 
 library(coronavirus)
 data(coronavirus)
-update_datasets()
+coronavirus::update_datasets()
 corona2 <- coronavirus[coronavirus$Province.State == "Ontario",]

@@ -25,9 +25,9 @@ url <- "https://data.ontario.ca/dataset/f4f86e54-872d-43f8-8a86-3892fd3cb5e6/res
 ont_data <- read.csv(url)
 
 ont_data <- ont_data[,c("Reported.Date", "Total.Cases", "Deaths", "Resolved")]
-names(ont_data) <- c("date", "confirmed_cum", "death_cum", "resolved_cum")
+names(ont_data) <- c("Date", "confirmed_cum", "death_cum", "resolved_cum")
 ont_data[is.na(ont_data)] <- 0
-ont_data$date <- as.Date(ont_data$date)
+ont_data$Date <- as.Date(ont_data$Date)
 
 ont_data$active_cum <- ont_data$confirmed_cum - ont_data$death_cum
 
@@ -36,31 +36,58 @@ ont_data$death <- ont_data$death_cum - c(0, ont_data$death_cum[-nrow(ont_data)])
 ont_data$active <- ont_data$active_cum - c(0, ont_data$active_cum[-nrow(ont_data)])
 ont_data$recovered <- ont_data$resolved_cum - c(0, ont_data$resolved_cum[-nrow(ont_data)])
 
-fst_case <- ont_data$date[min(which(ont_data$confirmed_cum > 0L))]
-fst_death <- ont_data$date[min(which(ont_data$death_cum > 0L))]
+fst_case <- ont_data$Date[min(which(ont_data$confirmed_cum > 0L))]
+fst_death <- ont_data$Date[min(which(ont_data$death_cum > 0L))]
 
+# load JHU Coronavirus data
 
-library(coronavirus)
-data(coronavirus)
+url <- "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv"
+global_cases <- read.csv(url)
+
+url <- "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv"
+global_deaths <- read.csv(url)
+
+url <- "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_recovered_global.csv"
+global_recov <- read.csv(url)
+
+library(reshape2)
+coronavirus <- melt(global_cases, id.vars = c("Province.State", "Country.Region", "Lat", "Long"))
+coronavirus$Date <- as.Date(coronavirus$variable, "X%m.%d.%y")
+coronavirus$variable <- "confirmed"
+
+tmp <- melt(global_deaths, id.vars = c("Province.State", "Country.Region", "Lat", "Long"))
+tmp$Date <- as.Date(tmp$variable, "X%m.%d.%y")
+tmp$variable <- "death"
+
+coronavirus <- rbind(coronavirus, tmp)
+
+tmp <- melt(global_recov, id.vars = c("Province.State", "Country.Region", "Lat", "Long"))
+tmp$Date <- as.Date(tmp$variable, "X%m.%d.%y")
+tmp$variable <- "recovered"
+
+coronavirus <- rbind(coronavirus, tmp)
+
+#library(coronavirus)
+#data(coronavirus)
 #update_datasets(silence = FALSE)
 
 cond <- coronavirus$Province.State == "Ontario"
 corona2 <- coronavirus[!cond,]
 
-mn_dt <- as.Date(min(c(corona2$date, ont_data$date)))
-mx_dt <- as.Date(max(c(corona2$date, ont_data$date)))
+mn_dt <- min(c(corona2$Date, ont_data$Date))
+mx_dt <- max(c(corona2$Date, ont_data$Date))
 
 # confirmed first
 tmp <- data.frame(Province.State = "Ontario",
             Country.Region = "Canada",
             Lat = 51.2538,
             Long = -85.3232,
-            date = seq(mn_dt, mx_dt, 1L),
-            cases = 0L,
-            type = "confirmed")
+            variable = "confirmed",
+            value = 0L,
+            Date = seq(mn_dt, mx_dt, 1L))
 
-tmp$cases <- ifelse(tmp$date %in% ont_data$date, 
-                    ont_data$confirmed[match(tmp$date, ont_data$date)],
+tmp$value <- ifelse(tmp$Date %in% ont_data$Date, 
+                    ont_data$confirmed[match(tmp$Date, ont_data$Date)],
                     0L)
 
 corona2 <- rbind(corona2, tmp)
@@ -70,12 +97,12 @@ tmp <- data.frame(Province.State = "Ontario",
                   Country.Region = "Canada",
                   Lat = 51.2538,
                   Long = -85.3232,
-                  date = seq(mn_dt, mx_dt, 1L),
-                  cases = 0L,
-                  type = "death")
+                  variable = "death",
+                  value = 0L,
+                  Date = seq(mn_dt, mx_dt, 1L))
 
-tmp$cases <- ifelse(tmp$date %in% ont_data$date, 
-                    ont_data$death[match(tmp$date, ont_data$date)],
+tmp$value <- ifelse(tmp$Date %in% ont_data$Date, 
+                    ont_data$death[match(tmp$Date, ont_data$Date)],
                     0L)
 
 corona2 <- rbind(corona2, tmp)
@@ -85,15 +112,18 @@ tmp <- data.frame(Province.State = "Ontario",
                   Country.Region = "Canada",
                   Lat = 51.2538,
                   Long = -85.3232,
-                  date = seq(mn_dt, mx_dt, 1L),
-                  cases = 0L,
-                  type = "recovered")
+                  variable = "recovered",
+                  value = 0L,
+                  Date = seq(mn_dt, mx_dt, 1L))
 
-tmp$cases <- ifelse(tmp$date %in% ont_data$date, 
-                    ont_data$recovered[match(tmp$date, ont_data$date)],
+tmp$value <- ifelse(tmp$Date %in% ont_data$Date, 
+                    ont_data$recovered[match(tmp$Date, ont_data$Date)],
                     0L)
 
 corona2 <- rbind(corona2, tmp)
+
+names(corona2) <- c("Province.State", "Country.Region", "Lat", "Long", "type", "cases", "Date")
+
 
 `%>%` <- magrittr::`%>%`
 #------------------ Parameters ------------------
@@ -124,13 +154,13 @@ df <- corona2 %>%
 
 df_daily <- corona2 %>%
   dplyr::filter(Country.Region == "Canada" & Province.State == "Ontario") %>%
-  dplyr::group_by(date, type) %>%
+  dplyr::group_by(Date, type) %>%
   dplyr::summarise(total = sum(cases, na.rm = TRUE)) %>%
   tidyr::pivot_wider(
     names_from = type,
     values_from = total
   ) %>%
-  dplyr::arrange(date) %>%
+  dplyr::arrange(Date) %>%
   dplyr::ungroup() %>%
   dplyr::mutate(active = confirmed - death) %>%
   dplyr::mutate(
@@ -140,7 +170,7 @@ df_daily <- corona2 %>%
   )
 
 
-df1 <- corona2 %>% dplyr::filter(date == max(date))
+df1 <- corona2 %>% dplyr::filter(Date == max(Date))
 
 ```
 
@@ -202,7 +232,7 @@ Row
 ```{r}
 plotly::plot_ly(data = df_daily) %>%
   plotly::add_trace(
-    x = ~date,
+    x = ~Date,
     # y = ~active_cum,
     y = ~confirmed_cum,
     type = "scatter",
@@ -213,7 +243,7 @@ plotly::plot_ly(data = df_daily) %>%
     marker = list(color = active_color)
   ) %>%
   plotly::add_trace(
-    x = ~date,
+    x = ~Date,
     y = ~death_cum,
     type = "scatter",
     mode = "lines+markers",
@@ -271,13 +301,15 @@ daily_confirmed <- corona2 %>%
   dplyr::filter(type == "confirmed") %>%
   dplyr::filter(Country.Region != "Canada" | Country.Region == "Canada" & Province.State == "Ontario") %>%
   dplyr::mutate(country = Country.Region) %>%
-  dplyr::group_by(date, country) %>%
+  dplyr::group_by(Date, country) %>%
   dplyr::summarise(total = sum(cases)) %>%
   dplyr::ungroup() %>%
   tidyr::pivot_wider(names_from = country, values_from = total)
 
+daily_confirmed$Canada <- cumsum(daily_confirmed$Canada)
+
 for(i in 2:length(daily_confirmed)) {
-  tmp <- cumsum(daily_confirmed[,i])
+  tmp <- daily_confirmed[,i]
   tmp <- tmp[tmp >= 100]
   if (length(tmp) < nrow(daily_confirmed)) {
     daily_confirmed[,i] <- c(tmp, rep(NA, nrow(daily_confirmed) - length(tmp)))
@@ -285,7 +317,7 @@ for(i in 2:length(daily_confirmed)) {
     daily_confirmed[,i] <- tmp[1:nrow(daily_confirmed)]
   }
 }
-daily_confirmed$date <- 1:nrow(daily_confirmed)
+daily_confirmed$Date <- 1:nrow(daily_confirmed)
 cond <- apply(daily_confirmed[,names(daily_confirmed) %in% c("Canada", "US","Spain","Italy")], 1, function(x) any(!is.na(x)))
 daily_confirmed <- daily_confirmed[cond,]
 
@@ -329,28 +361,28 @@ for(i in 1:10) {
 daily_confirmed %>%
   plotly::plot_ly() %>%
   plotly::add_trace(
-    x = ~date,
+    x = ~Date,
     y = ~Canada,
     type = "scatter",
     mode = "lines+markers",
     name = "Ontario"
   ) %>%
   plotly::add_trace(
-    x = ~date,
+    x = ~Date,
     y = ~US,
     type = "scatter",
     mode = "lines+markers",
     name = "United States"
   ) %>%
   plotly::add_trace(
-    x = ~date,
+    x = ~Date,
     y = ~Spain,
     type = "scatter",
     mode = "lines+markers",
     name = "Spain"
   ) %>%
   plotly::add_trace(
-    x = ~date,
+    x = ~Date,
     y = ~Italy,
     type = "scatter",
     mode = "lines+markers",
@@ -444,11 +476,11 @@ plotly::plot_ly(
 
 ```{r logistic}
 cond <- corona2$Province.State == "Ontario" & corona2$type == "confirmed"
-df3 <- corona2[cond, c("date", "cases")]
+df3 <- corona2[cond, c("Date", "cases")]
 df3$cuml <- cumsum(df3$cases)
-df3 <- df3[df3$cuml > 0,c("date","cuml")]
+df3 <- df3[df3$cuml > 0,c("Date","cuml")]
 df3 <- df3[!duplicated(df3$cuml),]
-df3$X <- as.numeric(df3$date - min(df3$date))
+df3$X <- as.numeric(df3$Date - min(df3$Date))
 df3$Y <- as.numeric(df3$cuml)
 df3$X1 <- df3$X - 46
 
@@ -495,7 +527,7 @@ df3$Ye <- K * Y0 / (Y0 + (K - Y0) * exp(-r * df3$X1))
 
 
 addnl <- 1:30
-tmp <- data.frame(date = as.Date(max(df3$date)) + addnl,
+tmp <- data.frame(Date = max(df3$Date) + addnl,
                   cuml = NA_integer_,
                   X = max(df3$X) + addnl,
                   Y = NA_real_,
@@ -504,19 +536,19 @@ tmp <- data.frame(date = as.Date(max(df3$date)) + addnl,
 tmp$Ye <-  K * Y0 / (Y0 + (K - Y0) * exp(-r * tmp$X1))
 
 df3 <- rbind(df3, tmp)
-names(df3) <- c("date", "cuml", "X", "actual", "X1", "predicted")
+names(df3) <- c("Date", "cuml", "X", "actual", "X1", "predicted")
 
 df3 %>%
   plotly::plot_ly() %>%
   plotly::add_trace(
-    x = ~date,
+    x = ~Date,
     y = ~actual,
     type = "scatter",
     mode = "lines+markers",
     name = "Ontario actual"
   ) %>%
   plotly::add_trace(
-    x = ~date,
+    x = ~Date,
     y = ~predicted,
     type = "scatter",
     mode = "lines",
@@ -558,10 +590,26 @@ cv_data_for_plot <- corona2 %>%
   # dplyr::filter(Country.Region == "Belgium") %>%
   dplyr::filter(cases > 0) %>%
   dplyr::group_by(Country.Region, Province.State, Lat, Long, type) %>%
-  dplyr::summarise(cases = sum(cases)) %>%
+  #dplyr::summarise(cases = sum(cases)) %>%
   dplyr::mutate(log_cases = 2 * log(cases)) %>%
   dplyr::ungroup()
 
+# need cumulative data for ontario
+
+cond <- cv_data_for_plot$Province.State == "Ontario"
+tmp <- cv_data_for_plot[cond,]
+cv_data_for_plot <- cv_data_for_plot[!cond,]
+
+tmp2 <- split(tmp, tmp$type)
+tmp3 <- lapply(tmp2, 
+               function(x) {
+                 y <- x
+                 y$cases <- cumsum(x$cases)
+                 y
+               })
+tmp4 <- do.call("rbind", tmp3)
+
+cv_data_for_plot <- rbind(cv_data_for_plot, tmp4)
 
 cv_data_for_plot.split <- cv_data_for_plot %>% split(cv_data_for_plot$type)
 pal <- colorFactor(c("orange", "red", "green"), domain = c("confirmed", "death", "recovered"))
@@ -643,8 +691,5 @@ For any question or feedback, you can [contact me](https://www.statsandr.com/con
 
 **Update**
 
-The data is as of `r format(max(coronavirus$date), "%A %B %d, %Y")` and the dashboard has been updated on `r format(Sys.time(), "%A %B %d, %Y")`.
+The data is as of `r format(max(coronavirus$Date), "%A %B %d, %Y")` and the dashboard has been updated on `r format(Sys.time(), "%A %B %d, %Y")`.
 
-
-
-*Go back to [www.statsandr.com](https://www.statsandr.com/) (blog) or [www.antoinesoetewey.com](https://www.antoinesoetewey.com/) (personal website)*.
