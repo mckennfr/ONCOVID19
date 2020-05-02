@@ -57,3 +57,57 @@ z2 <- (12.5 - 1:12) / 39 / 12
 
 z2 - z
 z2
+macrs_39 <- function(m = 1) {
+  ann <- floor(100000 / 39) / 100000 
+  fst <- round((12.5 - m) / 12 * ( 1 - 38 * ann), 5)
+  lst <- 1 - 38 * ann - fst
+  c(fst, rep(ann, 38), lst)
+}
+
+macrs_y <- function(m = 1L, y = 39L) {
+  ann <- floor(100000 / (y - 1L)) / 100000 
+  fst <- round((12.5 - m) / 12 * ( 1 - (y - 1L) * ann), 5)
+  lst <- 1 - (y - 1L) * ann - fst
+  c(fst, rep(ann, (y - 1L)), lst)  
+}
+
+
+r <- 0.05
+#AII_adj <- (1 + 1.5 * r) / (1 + 0.5 * r)
+
+flag = 1
+AII_adj <- 1 + flag * r / (1 + 0.5 * r)
+PV_on <- 0.06 / (0.06 + r) * AII_adj
+
+
+f_us <- function(L) r * PV_on * L + exp(-r * L) - 1
+soln <- uniroot(f_us, c(2,40))
+
+
+
+
+mn_dif <- 999
+mn_y <- -1L
+for(y in 2:39) {
+  PV_us <- sum((1 + r) ^ -(1:(y+1L)) * macrs_y(6L, y))
+  dif <- abs(PV_us - PV_on)
+  cat(y, PV_us, dif, "\n")
+  if (dif < mn_dif) {
+    mn_dif <- dif
+    mn_y <- y
+  }
+}
+
+PV_ct <- function(L = 39, r = 0.05, t0 = 0.5, t1 = 0.5) {
+  (1 - exp(-r * L)) * exp(-r * (t1 - t0)) / r / L
+}
+
+PV_us <- sum((1 + r) ^ -(1:40) * macrs_39(6))
+
+alpha_0 <- r * PV_us / (1 - PV_us)
+
+
+alpha_us <- PV_us * r / (AII_adj - PV_us)
+
+
+
