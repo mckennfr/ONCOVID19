@@ -5,7 +5,7 @@ output:
   flexdashboard::flex_dashboard:
     orientation: rows
     # social: ["facebook", "twitter", "linkedin"]
-    # source_code: embed
+    source_code: embed
     vertical_layout: fill
     self_contained: false
 ---
